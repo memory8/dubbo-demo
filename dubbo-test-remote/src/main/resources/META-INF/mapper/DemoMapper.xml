@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dubbo.demo.mapper.DemoMapper">
+	
+	<resultMap id="DemoModelMap" type="com.dubbo.demo.model.DemoModel">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SEX" property="sex" jdbcType="INTEGER" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="commonCondition">
+		<if test="name!= null">
+			AND NAME=#{name}
+		</if>
+		<if test="sex!= null">
+			AND SEX=#{sex}
+		</if>
+		<if test="createDate!= null">
+			AND CREATE_DATE=#{createDate}
+		</if>
+	</sql>
+	
+	<sql id="commonProcessDateColumns">
+		ID,
+		NAME,
+		SEX,
+		CREATE_DATE
+	</sql>
+	
+	<select id="query" resultMap="DemoModelMap" parameterType="com.dubbo.demo.model.DemoModel">
+		SELECT
+		<include refid="commonProcessDateColumns" />
+		from ACT_DEMO WHERE 1=1
+		<include refid="commonCondition" />
+	</select>
+	
+	<select id="queryById" resultMap="DemoModelMap" parameterType="java.lang.Integer">
+		select
+		<include refid="commonProcessDateColumns" />
+		from act_demo
+		where ID = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<insert id="insert" parameterType="com.dubbo.demo.model.DemoModel"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into ACT_DEMO (
+		NAME,
+		SEX,
+		CREATE_DATE)
+		values (
+		#{name,jdbcType=VARCHAR},
+		#{sex,jdbcType=INTEGER},
+		#{createDate,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<update id="update" parameterType="com.dubbo.demo.model.DemoModel">
+		update ACT_DEMO
+		<set>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				SEX = #{sex,jdbcType=INTEGER},
+			</if>
+		</set>
+		WHERE ID = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<delete id="delete" parameterType="com.dubbo.demo.model.DemoModel">
+		delete from ACT_DEMO WHERE 1=1
+		<include refid="commonCondition" />
+	</delete>
+</mapper>

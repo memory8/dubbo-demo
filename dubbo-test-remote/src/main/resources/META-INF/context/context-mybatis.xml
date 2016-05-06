@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	<!-- 数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${mybatis.driverClassName}" />
+		<property name="url" value="${mybatis.jdbc}" />
+		<property name="username" value="${mybatis.user}" />
+		<property name="password" value="${mybatis.password}" />
+		<property name="defaultAutoCommit" value="false" />
+		
+		<!-- 连接池启动时创建的初始化连接数量（默认值为0） -->
+		<property name="initialSize" value="${mybatis.initialSize}" />
+		
+		<!-- 连接池中最大的空闲的连接数，超过的空闲连接将被释放，如果设置为负数表示不限制（默认为8个，maxIdle不能设置太小， 因为假如在高负载的情况下，连接的打开时间比关闭的时间快，会引起连接池中idle的个数 
+			上升超过maxIdle，而造成频繁的连接销毁和创建，类似于jvm参数中的Xmx设置) -->
+		<property name="maxIdle" value="${mybatis.maxIdle}" />
+		
+		<!-- 连接池中最小的空闲的连接数，低于这个数量会被创建新的连接（默认为0，调整为5，该参数越接近maxIdle，性能越好， 因为连接的创建和销毁，都是需要消耗资源的；但是不能太大，因为在机器很空闲的时候，也会创建低于minidle个数的连接，类似于jvm参数中的Xmn设置） -->
+		<property name="minIdle" value="${mybatis.minIdle}" />
+		
+		<property name="validationQuery" value="select now()" />
+		<property name="testOnBorrow" value="true" />
+	</bean>
+	
+	<!-- sessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.howbuy.act.model" />
+		<property name="configLocation" value="classpath:META-INF/context/mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath*:META-INF/mapper/*.xml" />
+		<property name="plugins">
+			<list>
+				<bean class="com.github.miemiedev.mybatis.paginator.OffsetLimitInterceptor">
+					<property name="dialectClass" value="com.github.miemiedev.mybatis.paginator.dialect.MySQLDialect" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 事物管理 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 自动扫描包、将Mapper接口生成代理注入到Spring -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.dubbo.demo.mapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+</beans>

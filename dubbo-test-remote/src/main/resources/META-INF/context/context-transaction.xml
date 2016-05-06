@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"   
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+    xmlns:context="http://www.springframework.org/schema/context"   
+    xmlns:aop="http://www.springframework.org/schema/aop"   
+    xmlns:tx="http://www.springframework.org/schema/tx"   
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd   
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd   
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd   
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+    
+	<aop:config>
+		<aop:pointcut id="txOperation" expression="execution(* com.dubbo.demo.service..*.*Service.*(..))"/>
+		<aop:advisor id="serviceTx"  advice-ref="txAdvice" pointcut-ref="txOperation" />
+	</aop:config>
+	
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="query*" read-only="true"/>
+			<tx:method name="find*" read-only="true"/>
+			<!-- 
+			spring 默认事物传播属性为 REQUIRED;
+			spring 默认隔离级别为数据库默认隔离级别，
+			oracle数据库默认隔离级别为READ_COMMITTED
+			-->
+			<tx:method name="*" rollback-for="Exception"/>
+		</tx:attributes>
+	</tx:advice>
+</beans>
